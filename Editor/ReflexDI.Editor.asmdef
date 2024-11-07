@@ -1,0 +1,9 @@
+{
+  "name": "ReflexDI.Editor",
+  "references": [
+    "ReflexDI.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}
