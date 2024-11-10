@@ -5,7 +5,13 @@ namespace ReflexDI
 
     internal class FieldInjector : IInjector
     {
-        IEnumerable<ReadOnlyParam> IInjector.ResolveParams(IResolver resolver, Type type, object instance)
+        IEnumerable<IInjectParameter> IInjector.ResolveParams
+        (
+            IResolver                                   resolver,
+            Type                                        type,
+            object                                      instance,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters
+        )
         {
             if (instance == null)
             {
@@ -16,12 +22,14 @@ namespace ReflexDI
 
             foreach (var fieldInfo in fieldInfos)
             {
-                var fieldType  = fieldInfo.FieldType;
-                var fieldValue = resolver.Resolve(fieldType);
+                var fieldType = fieldInfo.FieldType;
+                var fieldValue = parameters.TryGetValue(fieldType, out var injectParam)
+                                     ? injectParam.Value
+                                     : resolver.Resolve(fieldType);
 
                 fieldInfo.SetValue(instance, fieldValue);
 
-                yield return new ReadOnlyParam(fieldType, fieldValue);
+                yield return new TypeInjectParameter(fieldType, fieldValue);
             }
         }
     }

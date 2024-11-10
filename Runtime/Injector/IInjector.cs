@@ -5,6 +5,12 @@ namespace ReflexDI
 
     internal interface IInjector
     {
-        internal IEnumerable<ReadOnlyParam> ResolveParams(IResolver resolver, Type type, object instance);
+        internal IEnumerable<IInjectParameter> ResolveParams
+        (
+            IResolver                                   resolver,
+            Type                                        type,
+            object                                      instance,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
+        );
     }
 }

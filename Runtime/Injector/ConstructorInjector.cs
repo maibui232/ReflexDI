@@ -6,14 +6,27 @@ namespace ReflexDI
 
     internal class ConstructorInjector : IInjector
     {
-        IEnumerable<ReadOnlyParam> IInjector.ResolveParams(IResolver resolver, Type type, object instance)
+        IEnumerable<IInjectParameter> IInjector.ResolveParams
+        (
+            IResolver                                   resolver,
+            Type                                        type,
+            object                                      instance,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters
+        )
         {
             var constructorInfo = type.GetSingleConstructorInfo();
 
             return constructorInfo
                .GetParameters()
                .Select(parameterInfo => parameterInfo.ParameterType)
-               .Select(parameterType => new ReadOnlyParam(parameterType, resolver.Resolve(parameterType)));
+               .Select(parameterType =>
+                       {
+                           var paramValue = parameters.TryGetValue(parameterType, out var parameter)
+                                                ? parameter.Value
+                                                : resolver.Resolve(parameterType);
+
+                           return new TypeInjectParameter(parameterType, paramValue);
+                       });
         }
     }
 }

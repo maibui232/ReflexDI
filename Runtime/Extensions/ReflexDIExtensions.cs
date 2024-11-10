@@ -1,6 +1,7 @@
 namespace ReflexDI
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
     using Object = UnityEngine.Object;
@@ -20,9 +21,32 @@ namespace ReflexDI
             return registration;
         }
 
-        public static Registration WithParameter<T>(this Registration registration, Func<IResolver, T> resolverParam)
+        public static Registration WithParameter(this Registration registration, object value)
         {
-            registration.CustomParams.Add(new ReadOnlyParam(typeof(T), resolverParam.Invoke(DIContainer)));
+            var valueType = value.GetType();
+            registration.CustomParameters.Add(valueType, new TypeInjectParameter(valueType, value));
+
+            return registration;
+        }
+
+        public static Registration WithParameter(this Registration registration, Type type, Func<IResolver, object> value)
+        {
+            registration.CustomParameters.Add(type, new FuncInjectParameter(type, DIContainer, _ => value));
+
+            return registration;
+        }
+
+        public static Registration WithParameter<T>(this Registration registration, Func<IResolver, T> value)
+        {
+            registration.CustomParameters.Add(typeof(T), new FuncInjectParameter(typeof(T), DIContainer, resolver => value(resolver)));
+
+            return registration;
+        }
+
+        public static Registration WithParameter<T>(this Registration registration, Func<T> value)
+        {
+            var type = typeof(T);
+            registration.CustomParameters.Add(type, new FuncInjectParameter(type, DIContainer, _ => value()));
 
             return registration;
         }
@@ -77,44 +101,73 @@ namespace ReflexDI
             return Instantiate(resolver, typeof(T)) as T;
         }
 
-        public static object Instantiate(this IResolver resolver, Type type)
+        public static object Instantiate
+        (
+            this IResolver                              resolver,
+            Type                                        type,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
+        )
         {
-            var constructorParams = resolver.ResolveParams<ConstructorInjector>(type, null);
-            var instance          = Activator.CreateInstance(type, constructorParams.Select(param => param.Value).ToArray());
+            var constructorParams = resolver.ResolveParams<ConstructorInjector>(type, null, parameters);
 
-            resolver.Inject(instance);
+            var instance = Activator.CreateInstance(type, constructorParams.Select(param => param.Value).ToArray());
+
+            resolver.Inject(instance, parameters);
 
             return instance;
         }
 
-        public static T InstantiatePrefab<T>(this IResolver resolver, Component prefab, Transform parent = null) where T : MonoBehaviour
+        public static T InstantiatePrefab<T>
+        (
+            this IResolver                              resolver,
+            Component                                   prefab,
+            Transform                                   parent     = null,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
+        ) where T : MonoBehaviour
         {
-            return resolver.InstantiatePrefab(typeof(T), prefab, parent) as T;
+            return resolver.InstantiatePrefab(typeof(T), prefab, parent, parameters) as T;
         }
 
-        public static object InstantiatePrefab(this IResolver resolver, Type type, Component prefab, Transform parent = null)
+        public static object InstantiatePrefab
+        (
+            this IResolver                              resolver,
+            Type                                        type,
+            Component                                   prefab,
+            Transform                                   parent     = null,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
+        )
         {
             var gameObjectInstance = Object.Instantiate(prefab.gameObject, parent);
 
             var component = gameObjectInstance.GetComponent(type);
-            resolver.Inject(component);
+            resolver.Inject(component, parameters);
 
             return component;
         }
 
-        public static void Inject(this IResolver resolver, object instance)
+        public static void Inject
+        (
+            this IResolver                              resolver,
+            object                                      instance,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
+        )
         {
             var type = instance.GetType();
-            resolver.ResolveParams<MethodInjector>(type, instance);
-            resolver.ResolveParams<FieldInjector>(type, instance);
-            resolver.ResolveParams<PropertyInjector>(type, instance);
+            resolver.ResolveParams<MethodInjector>(type, instance, parameters);
+            resolver.ResolveParams<FieldInjector>(type, instance, parameters);
+            resolver.ResolveParams<PropertyInjector>(type, instance, parameters);
         }
 
-        public static void InjectGameObject(this IResolver resolver, GameObject gameObject)
+        public static void InjectGameObject
+        (
+            this IResolver                              resolver,
+            GameObject                                  gameObject,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
+        )
         {
             foreach (var monoBehaviour in gameObject.GetComponents<MonoBehaviour>())
             {
-                resolver.Inject(monoBehaviour);
+                resolver.Inject(monoBehaviour, parameters);
             }
         }
 

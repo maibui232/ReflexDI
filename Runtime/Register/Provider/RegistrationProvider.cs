@@ -14,7 +14,7 @@ namespace ReflexDI
         {
             if (this.SingletonInstance != null) return this.SingletonInstance;
 
-            this.SingletonInstance = resolver.Instantiate(this.Registration.ImplementedType);
+            this.SingletonInstance = resolver.Instantiate(this.Registration.ImplementedType, this.Registration.CustomParameters);
 
             return this.SingletonInstance;
         }

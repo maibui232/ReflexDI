@@ -5,11 +5,11 @@ namespace ReflexDI
 
     public class Registration
     {
-        public   Type                   ImplementedType      { get; }
-        public   HashSet<Type>          RegisterTypes        { get; } = new();
-        internal HashSet<Type>          DependencyTypes      { get; } = new();
-        internal HashSet<ReadOnlyParam> CustomParams         { get; } = new();
-        internal RegistrationProvider   RegistrationProvider { get; set; }
+        public   Type                               ImplementedType      { get; }
+        public   HashSet<Type>                      RegisterTypes        { get; } = new();
+        internal HashSet<Type>                      DependencyTypes      { get; } = new();
+        internal Dictionary<Type, IInjectParameter> CustomParameters     { get; } = new();
+        internal RegistrationProvider               RegistrationProvider { get; set; }
 
         public Registration(Type implementedType)
         {

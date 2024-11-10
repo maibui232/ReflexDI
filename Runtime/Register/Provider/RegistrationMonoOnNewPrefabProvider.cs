@@ -17,7 +17,7 @@ namespace ReflexDI
             var gameObjectInstance = Object.Instantiate(this.Registration.Prefab.gameObject, this.Registration.Parent);
             var component          = gameObjectInstance.AddComponent(this.Registration.ImplementedType);
 
-            resolver.Inject(component);
+            resolver.Inject(component, this.Registration.CustomParameters);
             this.SingletonInstance = component;
 
             return this.SingletonInstance;

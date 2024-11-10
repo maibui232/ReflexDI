@@ -19,9 +19,15 @@ namespace ReflexDI
             return TypeToInjectorCached[type];
         }
 
-        internal static IEnumerable<ReadOnlyParam> ResolveParams<TInjector>(this IResolver resolver, Type type, object instance) where TInjector : IInjector
+        internal static IEnumerable<IInjectParameter> ResolveParams<TInjector>
+        (
+            this IResolver                              resolver,
+            Type                                        type,
+            object                                      instance,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
+        ) where TInjector : IInjector
         {
-            return GetInjector<TInjector>().ResolveParams(resolver, type, instance);
+            return GetInjector<TInjector>().ResolveParams(resolver, type, instance, parameters);
         }
     }
 }

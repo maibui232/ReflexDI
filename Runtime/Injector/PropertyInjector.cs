@@ -5,12 +5,20 @@ namespace ReflexDI
 
     internal class PropertyInjector : IInjector
     {
-        IEnumerable<ReadOnlyParam> IInjector.ResolveParams(IResolver resolver, Type type, object instance)
+        IEnumerable<IInjectParameter> IInjector.ResolveParams
+        (
+            IResolver                                   resolver,
+            Type                                        type,
+            object                                      instance,
+            IReadOnlyDictionary<Type, IInjectParameter> parameters
+        )
         {
             foreach (var propertyInfo in type.GetInjectablePropertyInfos())
             {
-                var propertyType  = propertyInfo.PropertyType;
-                var propertyValue = resolver.Resolve(propertyType);
+                var propertyType = propertyInfo.PropertyType;
+                var propertyValue = parameters.TryGetValue(propertyType, out var injectParameter)
+                                        ? injectParameter.Value
+                                        : resolver.Resolve(propertyType);
 
                 if (!propertyInfo.CanWrite)
                 {
@@ -19,7 +27,7 @@ namespace ReflexDI
 
                 propertyInfo.SetValue(instance, propertyValue);
 
-                yield return new ReadOnlyParam(propertyInfo.PropertyType, propertyValue);
+                yield return new TypeInjectParameter(propertyInfo.PropertyType, propertyValue);
             }
         }
     }

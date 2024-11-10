@@ -12,7 +12,7 @@ namespace ReflexDI
         {
             if (this.SingletonInstance != null) return this.SingletonInstance;
 
-            resolver.Inject(this.Registration.CachedInstance);
+            resolver.Inject(this.Registration.CachedInstance, this.Registration.CustomParameters);
             this.SingletonInstance = this.Registration.CachedInstance;
 
             return this.SingletonInstance;
