@@ -1,0 +1,12 @@
+{
+  "name": "reflex.di",
+  "displayName": "ReflexDI",
+  "author": { "name": "MikeBui.", "url": "" },
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "Dependency Injection",
+  "keywords": [],
+  "license": "MIT",
+  "category": "DI",
+  "dependencies": {}
+}
