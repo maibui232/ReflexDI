@@ -1,8 +1,11 @@
 {
   "name": "maibui232.unity.reflex.di",
   "displayName": "ReflexDI",
-  "author": { "name": "MikeBui.", "url": "" },
-  "version": "1.0.1",
+  "author": {
+    "name": "MikeBui.",
+    "url": ""
+  },
+  "version": "1.0.2",
   "unity": "2022.3",
   "description": "Dependency Injection",
   "keywords": [],
