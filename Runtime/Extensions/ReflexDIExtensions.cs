@@ -3,6 +3,7 @@ namespace ReflexDI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ReflexDI.GameLoop;
     using UnityEngine;
     using Object = UnityEngine.Object;
 
@@ -53,23 +54,30 @@ namespace ReflexDI
 
         public static Registration As<T>(this Registration registration)
         {
-            ThrowExceptionExtensions.IfTypeNotAssignableFrom(typeof(T), registration.ImplementedType);
+            var type = typeof(T);
+            ThrowExceptionExtensions.IfTypeNotAssignableFrom(type, registration.ImplementedType);
 
-            registration.RegisterTypes.Add(typeof(T));
-
-            return registration;
+            return registration.AsType(type);
         }
 
         public static Registration AsSelf(this Registration registration)
         {
-            registration.RegisterTypes.Add(registration.ImplementedType);
-
-            return registration;
+            return registration.AsType(registration.ImplementedType);
         }
 
         public static Registration AsInterfaces(this Registration registration)
         {
             foreach (var type in registration.ImplementedType.GetInterfaces())
+            {
+                registration.AsType(type);
+            }
+
+            return registration;
+        }
+
+        private static Registration AsType(this Registration registration, Type type)
+        {
+            if (!registration.TryAddEntryPoint(type))
             {
                 registration.RegisterTypes.Add(type);
             }
@@ -165,10 +173,7 @@ namespace ReflexDI
             IReadOnlyDictionary<Type, IInjectParameter> parameters = null
         )
         {
-            foreach (var monoBehaviour in gameObject.GetComponents<MonoBehaviour>())
-            {
-                resolver.Inject(monoBehaviour, parameters);
-            }
+            foreach (var monoBehaviour in gameObject.GetComponents<MonoBehaviour>()) resolver.Inject(monoBehaviour, parameters);
         }
 
 #endregion
@@ -206,14 +211,14 @@ namespace ReflexDI
 
 #region Mono Register
 
-        public static RegistrationMonoOnNewPrefab RegisterComponentOnNewPrefab<T>(this IBuilder builder, Component prefab) where T : Component
+        public static RegistrationOnNewPrefab RegisterComponentOnNewPrefab<T>(this IBuilder builder, Component prefab) where T : Component
         {
             return builder.RegisterComponentOnNewPrefab(typeof(T), prefab);
         }
 
-        public static RegistrationMonoOnNewPrefab RegisterComponentOnNewPrefab(this IBuilder builder, Type type, Component prefab)
+        public static RegistrationOnNewPrefab RegisterComponentOnNewPrefab(this IBuilder builder, Type type, Component prefab)
         {
-            var registration = new RegistrationMonoOnNewPrefab(type, prefab);
+            var registration = new RegistrationOnNewPrefab(type, prefab);
             builder.AddRegistration(registration);
 
             return registration;
@@ -233,17 +238,90 @@ namespace ReflexDI
             return registration;
         }
 
-        public static RegistrationMonoOnNewGameObject RegisterComponentOnNewGameObject<T>(this IBuilder builder) where T : Component
+        public static RegistrationOnNewGameObject RegisterComponentOnNewGameObject<T>(this IBuilder builder) where T : Component
         {
             return builder.RegisterComponentOnNewGameObject(typeof(T));
         }
 
-        public static RegistrationMonoOnNewGameObject RegisterComponentOnNewGameObject(this IBuilder builder, Type type)
+        public static RegistrationOnNewGameObject RegisterComponentOnNewGameObject(this IBuilder builder, Type type)
         {
-            var registration = new RegistrationMonoOnNewGameObject(type);
+            var registration = new RegistrationOnNewGameObject(type);
             builder.AddRegistration(registration);
 
             return registration;
+        }
+
+#endregion
+
+#region GameLoop
+
+        private static Type[] entryPointType =
+        {
+            typeof(IInitializable),
+            typeof(IFixedTickable),
+            typeof(ITickable),
+            typeof(ILateTickable),
+            typeof(IDisposable),
+        };
+
+        private static bool TryAddEntryPoint(this Registration registration, Type type)
+        {
+            if (!entryPointType.Contains(type))
+            {
+                return false;
+            }
+
+            registration.EntryPointTypes.Add(type);
+
+            return true;
+        }
+
+        internal static void RegisterGameLoopEvent(this Registration registration, object instance)
+        {
+            if (registration.EntryPointTypes.Contains(typeof(IFixedTickable)))
+            {
+                GameLoopRunner.Instance.RegisterFixedTickable(instance as IFixedTickable);
+            }
+
+            if (registration.EntryPointTypes.Contains(typeof(ITickable)))
+            {
+                GameLoopRunner.Instance.RegisterTickable(instance as ITickable);
+            }
+
+            if (registration.EntryPointTypes.Contains(typeof(ILateTickable)))
+            {
+                GameLoopRunner.Instance.RegisterLateTickable(instance as ILateTickable);
+            }
+        }
+
+        internal static void UnRegisterGameLoopEvent(this Registration registration, object instance)
+        {
+            if (registration.EntryPointTypes.Remove(typeof(IFixedTickable)))
+            {
+                GameLoopRunner.Instance.UnRegisterFixedTickable(instance as IFixedTickable);
+            }
+
+            if (registration.EntryPointTypes.Remove(typeof(ITickable)))
+            {
+                GameLoopRunner.Instance.UnRegisterTickable(instance as ITickable);
+            }
+
+            if (registration.EntryPointTypes.Remove(typeof(ILateTickable)))
+            {
+                GameLoopRunner.Instance.UnRegisterLateTickable(instance as ILateTickable);
+            }
+        }
+
+        internal static void InitializeObject(this Registration registration, object instance)
+        {
+            if (!registration.EntryPointTypes.Contains(typeof(IInitializable))) return;
+            if (instance is IInitializable initializable) initializable.Initialize();
+        }
+
+        internal static void DisposeObject(this Registration registration, object instance)
+        {
+            if (!registration.EntryPointTypes.Contains(typeof(IDisposable))) return;
+            if (instance is IDisposable disposable) disposable.Dispose();
         }
 
 #endregion

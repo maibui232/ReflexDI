@@ -2,13 +2,13 @@ namespace ReflexDI
 {
     public class RegistrationInstanceProvider : RegistrationProvider
     {
-        private new RegistrationInstance Registration => (RegistrationInstance)base.Registration;
-
         public RegistrationInstanceProvider(Registration registration) : base(registration)
         {
         }
 
-        public override object SpawnInstance(IResolver resolver)
+        private new RegistrationInstance Registration => (RegistrationInstance)base.Registration;
+
+        protected override object GetSingletonInstance(IResolver resolver)
         {
             if (this.SingletonInstance != null) return this.SingletonInstance;
 

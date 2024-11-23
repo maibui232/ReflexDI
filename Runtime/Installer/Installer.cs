@@ -27,10 +27,7 @@ namespace ReflexDI
                 return;
             }
 
-            if (ctor.Length != 1)
-            {
-                throw new ArgumentException($"Type '{typeof(TDerived).FullName}' does not have a constructor with 1 parameter");
-            }
+            if (ctor.Length != 1) throw new ArgumentException($"Type '{typeof(TDerived).FullName}' does not have a constructor with 1 parameter");
 
             var ctorParams = ctor[0].GetParameters();
             if (ctorParams.Length == 0)
@@ -40,12 +37,9 @@ namespace ReflexDI
                 return;
             }
 
-            if (ctorParams.Length != 1)
-            {
-                throw new ArgumentException($"Type '{typeof(TDerived).FullName}' does not have a constructor with 1 parameter");
-            }
+            if (ctorParams.Length != 1) throw new ArgumentException($"Type '{typeof(TDerived).FullName}' does not have a constructor with 1 parameter");
 
-            var installer = Activator.CreateInstance(typeof(TDerived), args: concrete) as TDerived;
+            var installer = Activator.CreateInstance(typeof(TDerived), concrete) as TDerived;
             installer?.Installing(builder, resolver, parent);
         }
 

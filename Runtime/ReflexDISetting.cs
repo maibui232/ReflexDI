@@ -10,22 +10,19 @@ namespace ReflexDI
     {
         [SerializeField] private GameScope rootGameScopePrefab;
 
+        private bool isInitialized;
+
         public static ReflexDISetting Instance { get; private set; }
 
-        private bool isInitialized;
+        private void OnEnable()
+        {
+            if (Application.isPlaying) Instance = this;
+        }
 
         private void OnDisable()
         {
             this.isInitialized = false;
             Instance           = null;
-        }
-
-        private void OnEnable()
-        {
-            if (Application.isPlaying)
-            {
-                Instance = this;
-            }
         }
 
         public void InitializeRootScopeIfNeed()
@@ -38,6 +35,8 @@ namespace ReflexDI
         public void BuildScopeIfNeed(GameScope gameScope)
         {
             if (gameScope.IsBuild) return;
+            gameScope.RegisterInstance<IResolver>(ReflexDIExtensions.DIContainer);
+
             gameScope.Build(ReflexDIExtensions.DIContainer);
         }
 

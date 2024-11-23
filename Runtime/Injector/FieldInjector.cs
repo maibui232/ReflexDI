@@ -13,10 +13,7 @@ namespace ReflexDI
             IReadOnlyDictionary<Type, IInjectParameter> parameters
         )
         {
-            if (instance == null)
-            {
-                throw new ArgumentNullException(type.FullName);
-            }
+            if (instance == null) throw new ArgumentNullException(type.FullName);
 
             var fieldInfos = type.GetInjectableFieldInfos();
 

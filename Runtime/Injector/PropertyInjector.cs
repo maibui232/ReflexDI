@@ -20,10 +20,7 @@ namespace ReflexDI
                                         ? injectParameter.Value
                                         : resolver.Resolve(propertyType);
 
-                if (!propertyInfo.CanWrite)
-                {
-                    throw new Exception($"Property {propertyInfo.Name} has no setter");
-                }
+                if (!propertyInfo.CanWrite) throw new Exception($"Property {propertyInfo.Name} has no setter");
 
                 propertyInfo.SetValue(instance, propertyValue);
 

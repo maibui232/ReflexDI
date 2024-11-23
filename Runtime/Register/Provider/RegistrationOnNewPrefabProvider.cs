@@ -2,15 +2,15 @@ namespace ReflexDI
 {
     using UnityEngine;
 
-    public class RegistrationMonoOnNewPrefabProvider : RegistrationProvider
+    public class RegistrationOnNewPrefabProvider : RegistrationProvider
     {
-        private new RegistrationMonoOnNewPrefab Registration => (RegistrationMonoOnNewPrefab)base.Registration;
-
-        public RegistrationMonoOnNewPrefabProvider(Registration registration) : base(registration)
+        public RegistrationOnNewPrefabProvider(Registration registration) : base(registration)
         {
         }
 
-        public override object SpawnInstance(IResolver resolver)
+        private new RegistrationOnNewPrefab Registration => (RegistrationOnNewPrefab)base.Registration;
+
+        protected override object GetSingletonInstance(IResolver resolver)
         {
             if (this.SingletonInstance != null) return this.SingletonInstance;
 

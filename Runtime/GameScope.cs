@@ -48,10 +48,7 @@ namespace ReflexDI
 
         public void AddRegistration(Registration registration)
         {
-            if (this.Registrations.Contains(registration))
-            {
-                ThrowExceptionExtensions.HasRegistration(registration.ImplementedType);
-            }
+            if (this.Registrations.Contains(registration)) ThrowExceptionExtensions.HasRegistration(registration.ImplementedType);
 
             this.Registrations.Add(registration);
         }
@@ -64,10 +61,7 @@ namespace ReflexDI
 
         private void InternalBuild(IResolver resolver)
         {
-            foreach (var installer in this.monoInstallers)
-            {
-                installer.Installing(this, resolver, this.transform);
-            }
+            foreach (var installer in this.monoInstallers) installer.Installing(this, resolver, this.transform);
 
             ReflexDIExtensions.DIContainer.Build(this);
             this.BuildCallback?.Invoke(this);
@@ -78,10 +72,7 @@ namespace ReflexDI
         {
             foreach (var obj in this.injectableObjects)
             {
-                if (obj == null)
-                {
-                    Debug.LogError($"Object {obj} is null");
-                }
+                if (obj == null) Debug.LogError($"Object {obj} is null");
 
                 resolver.InjectGameObject(obj);
             }

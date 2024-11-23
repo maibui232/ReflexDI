@@ -10,7 +10,29 @@ namespace ReflexDI
         internal Registration Registration { get; }
         internal bool         IsNonLazy    { get; set; }
 
-        public virtual object SpawnInstance(IResolver resolver)
+#region Destruction Instance
+
+        internal void DestructInstance()
+        {
+            if (this.SingletonInstance == null) return;
+            this.Registration.UnRegisterGameLoopEvent(this.SingletonInstance);
+            this.Registration.DisposeObject(this.SingletonInstance);
+        }
+
+#endregion
+
+#region Construction Instance
+
+        internal object ConstructInstance(IResolver resolver)
+        {
+            var instance = this.GetSingletonInstance(resolver);
+            this.Registration.InitializeObject(instance);
+            this.Registration.RegisterGameLoopEvent(instance);
+
+            return instance;
+        }
+
+        protected virtual object GetSingletonInstance(IResolver resolver)
         {
             if (this.SingletonInstance != null) return this.SingletonInstance;
 
@@ -20,5 +42,7 @@ namespace ReflexDI
         }
 
         protected object SingletonInstance { get; set; }
+
+#endregion
     }
 }

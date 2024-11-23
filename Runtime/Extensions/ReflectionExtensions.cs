@@ -10,10 +10,8 @@ namespace ReflexDI
         public static ConstructorInfo GetSingleConstructorInfo(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             var ctors = type.GetConstructors(bindingFlags);
-            if (ctors.Length != 1)
-            {
-                throw new Exception($"There must be exactly one constructor with the name {type.Name}");
-            }
+
+            if (ctors.Length != 1) throw new Exception($"There must be exactly one constructor with the name {type.Name}");
 
             return ctors[0];
         }

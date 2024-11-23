@@ -8,30 +8,9 @@ namespace ReflexDI
     {
         private readonly Dictionary<Type, Registration> typeToRegistration = new();
 
-        public void Build(GameScope gameScope)
+        public ReflexDIContainer()
         {
-            gameScope.DestroyCallback += this.OnDestroyScope;
-            foreach (var registration in gameScope.Registrations)
-            {
-                if (registration.RegistrationProvider.IsNonLazy)
-                {
-                    registration.RegistrationProvider.SpawnInstance(this);
-                }
-
-                foreach (var type in registration.RegisterTypes.Where(type => !this.typeToRegistration.TryAdd(type, registration)))
-                {
-                    ThrowExceptionExtensions.HasRegistration(type);
-                }
-            }
-        }
-
-        private void OnDestroyScope(GameScope scope)
-        {
-            scope.DestroyCallback -= this.OnDestroyScope;
-            foreach (var type in scope.Registrations.SelectMany(registration => registration.RegisterTypes))
-            {
-                this.typeToRegistration.Remove(type, out _);
-            }
+            this.typeToRegistration.Add(typeof(IResolver), new RegistrationInstance(typeof(IResolver), this).AsSelf());
         }
 
         public T Resolve<T>()
@@ -48,7 +27,35 @@ namespace ReflexDI
                 return default;
             }
 
-            return registration.RegistrationProvider.SpawnInstance(this);
+            return registration.RegistrationProvider.ConstructInstance(this);
+        }
+
+        public void Build(GameScope gameScope)
+        {
+            gameScope.DestroyCallback += this.OnDestroyScope;
+            foreach (var registration in gameScope.Registrations)
+            {
+                if (registration.RegistrationProvider.IsNonLazy)
+                {
+                    registration.RegistrationProvider.ConstructInstance(this);
+                }
+
+                foreach (var type in registration.RegisterTypes.Where(type => !this.typeToRegistration.TryAdd(type, registration)))
+                {
+                    ThrowExceptionExtensions.HasRegistration(type);
+                }
+            }
+        }
+
+        private void OnDestroyScope(GameScope scope)
+        {
+            scope.DestroyCallback -= this.OnDestroyScope;
+            foreach (var (_, registration) in this.typeToRegistration)
+            {
+                registration.RegistrationProvider.DestructInstance();
+            }
+
+            this.typeToRegistration.Clear();
         }
     }
 }
