@@ -132,16 +132,16 @@ namespace ReflexDI
             return instance;
         }
 
-        public static GameObject InstantiatePrefab
+        public static T InstantiatePrefab<T>
         (
             this IResolver                              resolver,
-            Component                                   prefab,
+            T                                           prefab,
             Transform                                   parent     = null,
             IReadOnlyDictionary<Type, IInjectParameter> parameters = null
-        )
+        ) where T : Component
         {
-            var instance = Object.Instantiate(prefab.gameObject, parent);
-            resolver.InjectGameObject(instance, parameters);
+            var instance = Object.Instantiate(prefab, parent);
+            resolver.InjectGameObject(instance.gameObject, parameters);
 
             return instance;
         }
