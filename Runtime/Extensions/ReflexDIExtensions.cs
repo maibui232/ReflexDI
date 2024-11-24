@@ -132,32 +132,18 @@ namespace ReflexDI
             return instance;
         }
 
-        public static T InstantiatePrefab<T>
-        (
-            this IResolver                              resolver,
-            Component                                   prefab,
-            Transform                                   parent     = null,
-            IReadOnlyDictionary<Type, IInjectParameter> parameters = null
-        ) where T : MonoBehaviour
-        {
-            return resolver.InstantiatePrefab(typeof(T), prefab, parent, parameters) as T;
-        }
-
         public static GameObject InstantiatePrefab
         (
             this IResolver                              resolver,
-            Type                                        type,
             Component                                   prefab,
             Transform                                   parent     = null,
             IReadOnlyDictionary<Type, IInjectParameter> parameters = null
         )
         {
-            var gameObjectInstance = Object.Instantiate(prefab.gameObject, parent);
+            var instance = Object.Instantiate(prefab.gameObject, parent);
+            resolver.InjectGameObject(instance, parameters);
 
-            var component = gameObjectInstance.GetComponent(type);
-            resolver.Inject(component, parameters);
-
-            return component.gameObject;
+            return instance;
         }
 
         public static void Inject
