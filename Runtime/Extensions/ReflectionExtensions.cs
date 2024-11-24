@@ -5,9 +5,9 @@ namespace ReflexDI
     using System.Linq;
     using System.Reflection;
 
-    public static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
-        public static ConstructorInfo GetSingleConstructorInfo(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        internal static ConstructorInfo GetSingleConstructorInfo(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             var ctors = type.GetConstructors(bindingFlags);
 
@@ -16,22 +16,22 @@ namespace ReflexDI
             return ctors[0];
         }
 
-        public static FieldInfo[] GetInjectableFieldInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        internal static FieldInfo[] GetInjectableFieldInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             return type.GetFields(bindingFlags).Where(fieldInfo => fieldInfo.GetCustomAttribute<InjectableAttribute>() != null).ToArray();
         }
 
-        public static PropertyInfo[] GetInjectablePropertyInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        internal static PropertyInfo[] GetInjectablePropertyInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             return type.GetProperties(bindingFlags).Where(propInfo => propInfo.GetCustomAttribute<InjectableAttribute>() != null).ToArray();
         }
 
-        public static MethodInfo[] GetInjectableMethodInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        internal static MethodInfo[] GetInjectableMethodInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             return type.GetMethods(bindingFlags).Where(methodInfo => methodInfo.GetCustomAttribute<InjectableAttribute>() != null).ToArray();
         }
 
-        public static IEnumerable<Type> GetDerivedTypes(this Type baseType)
+        internal static IEnumerable<Type> GetDerivedTypes(this Type baseType)
         {
             var result     = new List<Type>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
