@@ -13,6 +13,8 @@ namespace ReflexDI
             this.typeToRegistration.Add(typeof(IResolver), new RegistrationInstance(typeof(IResolver), this).AsSelf());
         }
 
+#region IResolver implementation
+
         public T Resolve<T>()
         {
             return (T)this.Resolve(typeof(T));
@@ -30,7 +32,9 @@ namespace ReflexDI
             return registration.RegistrationProvider.ConstructInstance(this);
         }
 
-        public void Build(GameScope gameScope)
+#endregion
+
+        internal void Build(GameScope gameScope)
         {
             gameScope.DestroyCallback += this.OnDestroyScope;
             foreach (var registration in gameScope.Registrations)

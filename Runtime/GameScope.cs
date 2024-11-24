@@ -6,7 +6,9 @@ namespace ReflexDI
 
     public interface IBuilder
     {
-        void AddRegistration(Registration registration);
+        void RegisterBuildCallback(Action<IResolver>  callback);
+        void RegisterDisposeCallback(Action<IBuilder> callback);
+        void AddRegistration(Registration             registration);
     }
 
     public class GameScope : MonoBehaviour, IBuilder
@@ -39,37 +41,43 @@ namespace ReflexDI
 
         internal HashSet<Registration> Registrations { get; } = new();
 
-        internal event Action<GameScope> BuildCallback;
+        internal event Action<IResolver> BuildCallback;
         internal event Action<GameScope> DestroyCallback;
 
 #endregion
 
 #region IBuilder Implementation
 
-        public void AddRegistration(Registration registration)
+        void IBuilder.RegisterBuildCallback(Action<IResolver> callback)
+        {
+            this.BuildCallback += callback;
+        }
+
+        void IBuilder.RegisterDisposeCallback(Action<IBuilder> callback)
+        {
+            this.DestroyCallback += callback;
+        }
+
+        void IBuilder.AddRegistration(Registration registration)
         {
             if (this.Registrations.Contains(registration)) ThrowExceptionExtensions.HasRegistration(registration.ImplementedType);
 
             this.Registrations.Add(registration);
         }
 
-        public void Build(IResolver resolver)
-        {
-            this.InternalBuild(resolver);
-            this.ResolveObjects(resolver);
-        }
+#endregion
 
-        private void InternalBuild(IResolver resolver)
+        internal void Build(IResolver resolver)
         {
-            foreach (var installer in this.monoInstallers) installer.Installing(this, resolver, this.transform);
+            foreach (var installer in this.monoInstallers)
+            {
+                installer.Installing(this, resolver, this.transform);
+            }
 
             ReflexDIExtensions.DIContainer.Build(this);
-            this.BuildCallback?.Invoke(this);
+            this.BuildCallback?.Invoke(ReflexDIExtensions.DIContainer);
             this.IsBuild = true;
-        }
 
-        private void ResolveObjects(IResolver resolver)
-        {
             foreach (var obj in this.injectableObjects)
             {
                 if (obj == null) Debug.LogError($"Object {obj} is null");
@@ -77,7 +85,5 @@ namespace ReflexDI
                 resolver.InjectGameObject(obj);
             }
         }
-
-#endregion
     }
 }

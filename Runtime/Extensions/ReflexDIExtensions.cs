@@ -52,6 +52,13 @@ namespace ReflexDI
             return registration;
         }
 
+        public static RegistrationMono UnderTransform(this RegistrationMono registration, Transform transform)
+        {
+            registration.Parent = transform;
+
+            return registration;
+        }
+
         public static Registration As<T>(this Registration registration)
         {
             var type = typeof(T);
@@ -136,7 +143,7 @@ namespace ReflexDI
             return resolver.InstantiatePrefab(typeof(T), prefab, parent, parameters) as T;
         }
 
-        public static object InstantiatePrefab
+        public static GameObject InstantiatePrefab
         (
             this IResolver                              resolver,
             Type                                        type,
@@ -150,7 +157,7 @@ namespace ReflexDI
             var component = gameObjectInstance.GetComponent(type);
             resolver.Inject(component, parameters);
 
-            return component;
+            return component.gameObject;
         }
 
         public static void Inject
@@ -255,7 +262,7 @@ namespace ReflexDI
 
 #region GameLoop
 
-        private static Type[] entryPointType =
+        private static readonly Type[] EntryPointType =
         {
             typeof(IInitializable),
             typeof(IFixedTickable),
@@ -266,7 +273,7 @@ namespace ReflexDI
 
         private static bool TryAddEntryPoint(this Registration registration, Type type)
         {
-            if (!entryPointType.Contains(type))
+            if (!EntryPointType.Contains(type))
             {
                 return false;
             }

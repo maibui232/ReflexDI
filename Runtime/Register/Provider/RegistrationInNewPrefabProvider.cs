@@ -1,7 +1,5 @@
 namespace ReflexDI
 {
-    using UnityEngine;
-
     public class RegistrationInNewPrefabProvider : RegistrationProvider
     {
         public RegistrationInNewPrefabProvider(Registration registration) : base(registration)
@@ -17,8 +15,7 @@ namespace ReflexDI
             var instance = resolver.InstantiatePrefab(this.Registration.ImplementedType, this.Registration.Prefab, this.Registration.Parent);
 
             if (!string.IsNullOrEmpty(this.Registration.GameObjectName))
-                if (instance is Component component)
-                    component.gameObject.name = this.Registration.GameObjectName;
+                instance.name = this.Registration.GameObjectName;
 
             this.SingletonInstance = instance;
 
