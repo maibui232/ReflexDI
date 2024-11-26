@@ -29,7 +29,8 @@ namespace ReflexDI
         {
             if (this.isInitialized) return;
             this.isInitialized = true;
-            DontDestroyOnLoad(Instantiate(this.rootGameScopePrefab));
+            var rootScopeInstance = Instantiate(this.rootGameScopePrefab);
+            DontDestroyOnLoad(rootScopeInstance);
         }
 
         public void BuildScopeIfNeed(GameScope gameScope)
