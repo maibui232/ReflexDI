@@ -1,6 +1,7 @@
 namespace ReflexDI
 {
     using System;
+    using System.Linq;
     using UnityEngine;
 
     public static class ThrowExceptionExtensions
@@ -19,15 +20,39 @@ namespace ReflexDI
         {
             if (!baseType.IsAssignableFrom(type)) throw new ArgumentException($"Instance type {baseType} is not assignable to type {type}");
         }
+    }
 
-        internal static void HasRegistration(Type type)
+    internal class RootGameScopeMissingException : Exception
+    {
+        public RootGameScopeMissingException()
         {
-            throw new ArgumentException($"Type {type} has been registered yet");
+            throw new Exception("Root Game Scope is missing");
         }
+    }
 
-        internal static void HasNotRegistration(Type type)
+    internal class ResolveException : Exception
+    {
+        public ResolveException(Type concreteType, params Type[] paramTypes)
         {
-            throw new ArgumentException($"Type {type} has not been registered yet");
+            var paramNameTypes = paramTypes.Select(paramType => paramType.FullName).ToArray();
+            
+            throw new Exception("Could not resolve " + string.Join(",\n", paramNameTypes) + " to " + concreteType.FullName);
+        }
+    }
+
+internal class RegistrationExistException : Exception
+    {
+        public RegistrationExistException(Type type)
+        {
+            throw new Exception($"Type {type} has been registered yet");
+        }
+    }
+
+    internal class RegistrationNotExistException : Exception
+    {
+        public RegistrationNotExistException(Type type)
+        {
+            throw new Exception($"Type {type} has not been registered yet");
         }
     }
 }

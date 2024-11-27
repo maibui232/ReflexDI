@@ -10,7 +10,8 @@ namespace ReflexDI
 
         public ReflexDIContainer()
         {
-            this.typeToRegistration.Add(typeof(IResolver), new RegistrationInstance(typeof(IResolver), this).AsSelf());
+            var thisType = typeof(IResolver);
+            this.typeToRegistration.Add(thisType, new RegistrationInstance(thisType, this).AsSelf());
         }
 
 #region IResolver implementation
@@ -24,9 +25,7 @@ namespace ReflexDI
         {
             if (!this.typeToRegistration.TryGetValue(type, out var registration))
             {
-                ThrowExceptionExtensions.HasNotRegistration(type);
-
-                return default;
+                throw new RegistrationNotExistException(type);
             }
 
             return registration.RegistrationProvider.ConstructInstance(this);
@@ -39,14 +38,19 @@ namespace ReflexDI
             gameScope.DestroyCallback += this.OnDestroyScope;
             foreach (var registration in gameScope.Registrations)
             {
-                if (registration.RegistrationProvider.IsNonLazy)
+                if (registration.RegisterTypes.Count == 0)
                 {
-                    registration.RegistrationProvider.ConstructInstance(this);
+                    registration.AsSelf();
                 }
 
                 foreach (var type in registration.RegisterTypes.Where(type => !this.typeToRegistration.TryAdd(type, registration)))
                 {
-                    ThrowExceptionExtensions.HasRegistration(type);
+                    throw new RegistrationExistException(type);
+                }
+
+                if (registration.RegistrationProvider.IsNonLazy)
+                {
+                    registration.RegistrationProvider.ConstructInstance(this);
                 }
             }
         }

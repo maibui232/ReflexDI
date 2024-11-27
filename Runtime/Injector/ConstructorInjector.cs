@@ -21,11 +21,16 @@ namespace ReflexDI
                .Select(parameterInfo => parameterInfo.ParameterType)
                .Select(parameterType =>
                        {
-                           var paramValue = parameters.TryGetValue(parameterType, out var parameter)
-                                                ? parameter.Value
-                                                : resolver.Resolve(parameterType);
+                           try
+                           {
+                               var paramValue = resolver.ResolveTypeWithCustomParams(parameters, parameterType);
 
-                           return new TypeInjectParameter(parameterType, paramValue);
+                               return new TypeInjectParameter(parameterType, paramValue);
+                           }
+                           catch (Exception)
+                           {
+                               throw new ResolveException(type, parameterType);
+                           }
                        });
         }
     }

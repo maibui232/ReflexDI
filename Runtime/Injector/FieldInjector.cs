@@ -19,10 +19,8 @@ namespace ReflexDI
 
             foreach (var fieldInfo in fieldInfos)
             {
-                var fieldType = fieldInfo.FieldType;
-                var fieldValue = parameters.TryGetValue(fieldType, out var injectParam)
-                                     ? injectParam.Value
-                                     : resolver.Resolve(fieldType);
+                var fieldType  = fieldInfo.FieldType;
+                var fieldValue = resolver.ResolveTypeWithCustomParams(parameters, fieldType);
 
                 fieldInfo.SetValue(instance, fieldValue);
 

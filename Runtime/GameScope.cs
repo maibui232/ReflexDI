@@ -60,9 +60,10 @@ namespace ReflexDI
 
         void IBuilder.AddRegistration(Registration registration)
         {
-            if (this.Registrations.Contains(registration)) ThrowExceptionExtensions.HasRegistration(registration.ImplementedType);
-
-            this.Registrations.Add(registration);
+            if (!this.Registrations.Add(registration))
+            {
+                throw new RegistrationExistException(registration.ImplementedType);
+            }
         }
 
 #endregion

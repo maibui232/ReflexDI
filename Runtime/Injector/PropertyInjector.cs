@@ -15,10 +15,8 @@ namespace ReflexDI
         {
             foreach (var propertyInfo in type.GetInjectablePropertyInfos())
             {
-                var propertyType = propertyInfo.PropertyType;
-                var propertyValue = parameters.TryGetValue(propertyType, out var injectParameter)
-                                        ? injectParameter.Value
-                                        : resolver.Resolve(propertyType);
+                var propertyType  = propertyInfo.PropertyType;
+                var propertyValue = resolver.ResolveTypeWithCustomParams(parameters, propertyType);
 
                 if (!propertyInfo.CanWrite) throw new Exception($"Property {propertyInfo.Name} has no setter");
 

@@ -29,15 +29,18 @@ namespace ReflexDI
         {
             if (this.isInitialized) return;
             this.isInitialized = true;
-            var rootScopeInstance = Instantiate(this.rootGameScopePrefab);
-            DontDestroyOnLoad(rootScopeInstance);
+
+            if (this.rootGameScopePrefab == null)
+            {
+                throw new RootGameScopeMissingException();
+            }
+
+            DontDestroyOnLoad(Instantiate(this.rootGameScopePrefab));
         }
 
         public void BuildScopeIfNeed(GameScope gameScope)
         {
             if (gameScope.IsBuild) return;
-            gameScope.RegisterInstance<IResolver>(ReflexDIExtensions.DIContainer);
-
             gameScope.Build(ReflexDIExtensions.DIContainer);
         }
 

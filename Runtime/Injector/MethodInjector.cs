@@ -20,10 +20,8 @@ namespace ReflexDI
                 var parameterValues = new List<object>();
                 foreach (var parameterInfo in methodInfo.GetParameters())
                 {
-                    var parameterType = parameterInfo.ParameterType;
-                    var parameterValue = parameters.TryGetValue(parameterType, out var injectParameter)
-                                             ? injectParameter.Value
-                                             : resolver.Resolve(parameterType);
+                    var parameterType  = parameterInfo.ParameterType;
+                    var parameterValue = resolver.ResolveTypeWithCustomParams(parameters, parameterType);
                     parameterValues.Add(parameterValue);
 
                     list.Add(new TypeInjectParameter(parameterType, parameterValue));

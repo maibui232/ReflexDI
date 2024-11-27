@@ -29,5 +29,12 @@ namespace ReflexDI
         {
             return GetInjector<TInjector>().ResolveParams(resolver, type, instance, parameters);
         }
+
+        internal static object ResolveTypeWithCustomParams(this IResolver resolver, IReadOnlyDictionary<Type, IInjectParameter> customParameters, Type type)
+        {
+            return customParameters != null && customParameters.TryGetValue(type, out var injectParameter)
+                       ? injectParameter.Value
+                       : resolver.Resolve(type);
+        }
     }
 }
