@@ -5,7 +5,7 @@ namespace ReflexDI
     using System.Linq;
     using System.Reflection;
 
-    internal static class ReflectionExtensions
+    public static class ReflectionExtensions
     {
         internal static ConstructorInfo GetSingleConstructorInfo(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
@@ -16,17 +16,17 @@ namespace ReflexDI
             return ctors[0];
         }
 
-        internal static FieldInfo[] GetInjectableFieldInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        public static FieldInfo[] GetInjectableFieldInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             return type.GetFields(bindingFlags).Where(fieldInfo => fieldInfo.GetCustomAttribute<InjectableAttribute>() != null).ToArray();
         }
 
-        internal static PropertyInfo[] GetInjectablePropertyInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        public static PropertyInfo[] GetInjectablePropertyInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             return type.GetProperties(bindingFlags).Where(propInfo => propInfo.GetCustomAttribute<InjectableAttribute>() != null).ToArray();
         }
 
-        internal static MethodInfo[] GetInjectableMethodInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        public static MethodInfo[] GetInjectableMethodInfos(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             return type.GetMethods(bindingFlags).Where(methodInfo => methodInfo.GetCustomAttribute<InjectableAttribute>() != null).ToArray();
         }
